@@ -40,7 +40,6 @@ def remove_particles_in_disk(x0,y0,r_disk,cutoff):
     indices = np.where(distances > r_disk + cutoff)[0]
     if 0 not in indices:
         indices = np.insert(indices, 0, 0)
-    #len(indices) = N_particles
     return x0[indices], y0[indices], len(indices)
 
 x0,y0, N_particles = remove_particles_in_disk(x0,y0,r_disk,cutoff_radius)
@@ -48,7 +47,6 @@ phi0 = (2 * np.random.rand(N_particles) - 1) * np.pi
 print(len(x0))
 
 
-##TODO only neighbours for the disk?? 
 # Initialize the neighbour list.
 def list_neighbours(x, y, N_particles, cutoff_radius):
     '''Prepare a neigbours list for each particle.'''
@@ -155,15 +153,15 @@ for j in range(1, N_particles):
 
 step = 0
 T_tot = 400
-t = 0
-trajectory = []
+max_iterations = int(T_tot/dt)
+trajectory = np.zeros((max_iterations,2))
 
 def stop_loop(event):
     global running
     running = False
 tk.bind("<Escape>", stop_loop)  # Bind the Escape key to stop the loop.
 running = True  # Flag to control the loop.
-while t < T_tot and running:
+while step < max_iterations and running:
     x_half = x + 0.5 * vx * dt      
     y_half = y + 0.5 * vy * dt      
 
@@ -236,11 +234,8 @@ while t < T_tot and running:
         tk.update()
         time.sleep(.001)  # Increase to slow down the simulation.    
 
+    trajectory[step] = (x[0],y[0])
     step += 1
-
-    t+=dt
-    trajectory.append((x[0],y[0]))
-
 
 
 tk.update_idletasks()
@@ -249,12 +244,12 @@ tk.mainloop()  # Release animation handle (close window to finish).
 
 
 ################## P1 ################################
-x_positions = [pos[0] for pos in trajectory]
-y_positions = [pos[1] for pos in trajectory]
+x_positions = np.array([pos[0] for pos in trajectory])
+y_positions = np.array([pos[1] for pos in trajectory])
 
 # Plotting the trajectory
 plt.figure(figsize=(8, 6))
-plt.plot(x_positions, y_positions, marker='o', linestyle='-', color='b', markersize=2, label="Disk Trajectory")
+plt.plot(x_positions, y_positions, marker='o', linestyle='-', color='b', markersize=1, label="Disk Trajectory")
 plt.xlabel("X Position")
 plt.ylabel("Y Position")
 plt.title("Trajectory of the Disk in 2D Space")
@@ -269,17 +264,27 @@ N = len(x_positions)
 msd = np.zeros(N)
 for n in range(0,N):
     print(n)
-    frac = 1/(N-n)
+    """frac = 1/(N-n)
     sum = 0
     for i in range(0, N-n):
         sum += (x_positions[i+n]-x_positions[i]) ** 2 + (y_positions[i+n]-y_positions[i])**2
     tmp = frac * sum 
-    msd[n] = tmp
+    msd[n] = tmp"""
+
+    #  x_positions[n:] = all elements starting from the nth one = so basically i+n
+    #  x_positions[:N-n] = all elements starting from the first up to N-n = so basically elements i=1 to N-n
+    # analogous for y_positions
+    dx = x_positions[n:] - x_positions[:N-n]
+    dy = y_positions[n:] - y_positions[:N-n]
+    squared_displacements = dx**2 + dy**2
+    
+    # Use the mean directly to compute the MSD
+    msd[n] = np.mean(squared_displacements)
 
 
 # Create the plot
 plt.figure(figsize=(10, 6))
-plt.plot(range(N), msd, marker='o', linestyle='-', color='b', label='MSD')
+plt.plot(range(N), msd, marker='o', linestyle='-', color='b', label='MSD', markersize=1)
 
 # Add labels and title
 plt.title('Mean Squared Displacement (MSD) vs. Time Lag', fontsize=16)

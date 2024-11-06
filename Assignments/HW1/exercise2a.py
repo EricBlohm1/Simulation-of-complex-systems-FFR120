@@ -125,9 +125,11 @@ S = int(np.ceil(Nspins * f))  # Number of randomly selected spins.
 
 step = 0
 steps_max = 500
+m = np.zeros(len(H_list))
+avg_interval = 200
 
 for i, H in enumerate(H_list):
-    #### Re-initialize lattice for each H ####
+    #### Re-initialize for each H ####
     sl = 2 * np.random.randint(2, size=(N, N)) - 1
     N_up = np.sum(sl + 1) / 2
     N_down = N * N - N_up
@@ -190,6 +192,10 @@ for i, H in enumerate(H_list):
             tk.update()
             time.sleep(0.1)  # Increase to slow down the simulation.
 
+        if steps_max - step < avg_interval:
+            m[i] += (1/N**2) * np.sum(sl)
+        elif steps_max - step  == 1:
+            m[i] = m[i]/avg_interval
         step += 1
 
 tk.update_idletasks()
