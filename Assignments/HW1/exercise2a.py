@@ -1,19 +1,5 @@
 import numpy as np
-
-N = 100  # Size of the splin lattice.
-H_list = [-5, -2, -1, -0.5, -0.2, -0.1, 0, 0.1, 0.2, 0.5, 1, 2, 5]  # External field.
-J = 1  # Spin-spin coupling.
-T = 5  # Temperature. Temperatura critica ~2.269.
-
-"""
-sl = 2 * np.random.randint(2, size=(N, N)) - 1
-
-N_up = np.sum(sl + 1) / 2
-N_down = N * N - N_up
-
-print(f"Spin lattice created:  N_up={N_up}  N_down={N_down}")
-"""
-
+import matplotlib.pyplot as plt
 
 def neighboring_spins(i_list, j_list, sl):
     """
@@ -105,31 +91,23 @@ import time
 from tkinter import *
 
 f = 0.05  # Number of randomly selected spins to flip-test.
-N_skip = 10 # Visualize status every N_skip steps. 
+N_skip = 999 #10  Visualize status every N_skip steps. 
 
 window_size = 600
 
-"""tk = Tk()
-tk.geometry(f'{window_size + 20}x{window_size + 20}')
-tk.configure(background='#000000')
+N = 100  # Size of the splin lattice.
+H_list = np.array([-5, -2, -1, -0.5, -0.2, -0.1, 0, 0.1, 0.2, 0.5, 1, 2, 5])  # External field.
+J = 1  # Spin-spin coupling.
+T = 5  # Temperature. Temperatura critica ~2.269.
 
-canvas = Canvas(tk, background='#ECECEC')  # Generate animation window.
-tk.attributes('-topmost', 0)
-canvas.place(x=10, y=10, height=window_size, width=window_size)
-
-Nspins = np.size(sl)  # Total number of spins in the spin lattice.
-Ni, Nj = sl.shape
-
-S = int(np.ceil(Nspins * f))  # Number of randomly selected spins.
-"""
-
-step = 0
-steps_max = 500
+steps_max = 1000
 m = np.zeros(len(H_list))
-avg_interval = 200
-
-for i, H in enumerate(H_list):
+avg = 200
+N = 100
+for index, H in enumerate(H_list):
     #### Re-initialize for each H ####
+    step = 0
+    print(f"H={H}")
     sl = 2 * np.random.randint(2, size=(N, N)) - 1
     N_up = np.sum(sl + 1) / 2
     N_down = N * N - N_up
@@ -153,10 +131,12 @@ for i, H in enumerate(H_list):
         running = False
     tk.bind("<Escape>", stop_loop)  # Bind the Escape key to stop the loop.
     running = True  # Flag to control the loop.
-    ################################################################
+    #############################################################
+
     while step < steps_max and running:
         ns = random.sample(range(Nspins), S)
 
+        #Retrieve indices for i and j in 1D format
         i_list = list(map(lambda x: x % Ni, ns)) 
         j_list = list(map(lambda x: x // Ni, ns)) 
 
@@ -192,11 +172,43 @@ for i, H in enumerate(H_list):
             tk.update()
             time.sleep(0.1)  # Increase to slow down the simulation.
 
-        if steps_max - step < avg_interval:
-            m[i] += (1/N**2) * np.sum(sl)
-        elif steps_max - step  == 1:
-            m[i] = m[i]/avg_interval
+        if steps_max - step < avg:
+            m[index] += (1/N**2) * np.sum(sl)
         step += 1
+    m[index] = m[index]/avg
+    
+## Plot m(H)
+plt.plot(H_list, m, marker='o', linestyle='-', color='b', label='m(H)')
+plt.xlabel('H')
+plt.ylabel('m')
+plt.title('Plot of m(H)')
+plt.legend()
+plt.grid(True)
+plt.show()
+
+
+
+delta = 0.11  # This is the range around H = 0 where you want the fit
+# Select data points within the range |H| < delta
+H_fit = np.array([elem for elem in H_list if np.abs(elem) < delta])
+indices = np.where(np.abs(H_list) < delta)
+m_fit = m[indices]
+
+slope, intercept = np.polyfit(H_fit, m_fit, 1)
+fitted_line = slope * np.array(H_list) + intercept
+plt.plot(H_list, m, marker='o', linestyle='-', color='b', label='m(H)')
+plt.plot(H_fit, slope * H_fit + intercept, color='r', linestyle='--', label=f'Linear Fit: y = {slope:.2f}x + {intercept:.2f} around H=0')
+plt.xlabel('H')
+plt.ylabel('m')
+plt.ylim([-1, 1])
+plt.title('Plot of m(H) with Linear Fit Around H=0')
+plt.legend()
+
+# Add a grid
+plt.grid(True)
+
+# Display the plot
+plt.show()
 
 tk.update_idletasks()
 tk.update()

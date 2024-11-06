@@ -82,7 +82,6 @@ nvx = np.zeros(N_particles)
 nvy = np.zeros(N_particles)
 
 
-##TODO change to lennard jones
 def total_force_cutoff(x, y, N_particles, sigma, epsilon, neighbours):
     '''
     Calculate the total force on each particle due to the interaction with a 
