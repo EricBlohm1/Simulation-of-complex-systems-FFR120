@@ -91,24 +91,23 @@ import time
 from tkinter import *
 
 f = 0.05  # Number of randomly selected spins to flip-test.
-N_skip = 4999 #10  Visualize status every N_skip steps. 
+N_skip = 999 #10  Visualize status every N_skip steps. 
 
 window_size = 600
 
 N = 100  # Size of the splin lattice.
-#Temperatura critica ~2.269.
-T_list = np.array([0.1, 0.2, 0.5, 1, 2, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 3, 5])  # External field.
+H_list = np.array([-5, -2, -1, -0.5, -0.2, -0.1, 0, 0.1, 0.2, 0.5, 1, 2, 5])  # External field.
 J = 1  # Spin-spin coupling.
+T = 5  # Temperature. Temperatura critica ~2.269.
 
-
-steps_max = 5000
-m = np.zeros(len(T_list))
+steps_max = 1000
+m = np.zeros(len(H_list))
+avg = 200
 N = 100
-for index, T in enumerate(T_list):
+for index, H in enumerate(H_list):
     #### Re-initialize for each H ####
-    H = 0.1
     step = 0
-    print(f"T={T}")
+    print(f"H={H}")
     sl = 2 * np.random.randint(2, size=(N, N)) - 1
     N_up = np.sum(sl + 1) / 2
     N_down = N * N - N_up
@@ -135,10 +134,9 @@ for index, T in enumerate(T_list):
     #############################################################
 
     while step < steps_max and running:
-        if(step > 300):
-            H = 0
         ns = random.sample(range(Nspins), S)
 
+        #Retrieve indices for i and j in 1D format
         i_list = list(map(lambda x: x % Ni, ns)) 
         j_list = list(map(lambda x: x // Ni, ns)) 
 
@@ -174,18 +172,59 @@ for index, T in enumerate(T_list):
             tk.update()
             time.sleep(0.1)  # Increase to slow down the simulation.
 
-        m[index] += (1/N**2) * np.sum(sl)
+        if steps_max - step < avg:
+            m[index] += (1/N**2) * np.sum(sl)
         step += 1
-    m[index] = m[index]/steps_max
+    m[index] = m[index]/avg
+    
 ## Plot m(H)
-plt.plot(T_list, m, marker='o', linestyle='-', color='b', label='m(T)')
-plt.xlabel('T')
+plt.plot(H_list, m, marker='o', linestyle='-', color='b', label='m(H)')
+plt.xlabel('H')
 plt.ylabel('m')
-plt.title('Plot of m(T)')
+plt.title('Plot of m(H)')
 plt.legend()
 plt.grid(True)
 plt.show()
 
+
+
+### Linear fit with the elements closest to 0 ####
+delta = 0.11 
+# Select data points within the range |H| < delta
+H_fit = np.array([elem for elem in H_list if np.abs(elem) < delta])
+indices = np.where(np.abs(H_list) < delta)
+m_fit = m[indices]
+
+slope, intercept = np.polyfit(H_fit, m_fit, 1)
+fitted_line = slope * np.array(H_list) + intercept
+plt.plot(H_list, m, marker='o', linestyle='-', color='b', label='m(H)')
+plt.plot(H_list, slope * H_list, color='r', linestyle='--', label=f'Linear Fit: y = {slope:.2f}x around H=0')
+plt.xlabel('H')
+plt.ylabel('m')
+plt.ylim([-1, 1])
+plt.title('Plot of m(H) with Linear Fit Around H=0')
+plt.legend()
+plt.grid(True)
+plt.show()
+
+### Linear fit with more elements ####
+delta = 0.21 
+# Select data points within the range |H| < delta
+H_fit = np.array([elem for elem in H_list if np.abs(elem) < delta])
+indices = np.where(np.abs(H_list) < delta)
+m_fit = m[indices]
+
+slope, intercept = np.polyfit(H_fit, m_fit, 1)
+fitted_line = slope * np.array(H_list) + intercept
+plt.plot(H_list, m, marker='o', linestyle='-', color='b', label='m(H)')
+plt.plot(H_list, slope * H_list, color='r', linestyle='--', label=f'Linear Fit: y = {slope:.2f}x around H=0')
+plt.xlabel('H')
+plt.ylabel('m')
+plt.ylim([-1, 1])
+plt.title('Plot of m(H) with Linear Fit Around H=0')
+plt.legend()
+plt.grid(True)
+plt.show()
 
 tk.update_idletasks()
 tk.update()
