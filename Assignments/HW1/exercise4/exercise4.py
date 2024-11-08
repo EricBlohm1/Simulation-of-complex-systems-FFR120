@@ -185,21 +185,25 @@ for run in range(0,runs):
         step += 1
     avg_D[run] = np.sum(D)/step_max
     print(f"Average density in run {run} is: {avg_D[run]}")
-    steady_state_time = np.where(avg_D[run] >= D)[0][0]
+    steady_state_time = np.where(D <= avg_D[run])[0][0]
     steady_states[run] = steady_state_time
-    print(f"step where steady state is reached: ", steady_state_time)
+    print(f"Step where steady state is reached: ", steady_state_time)
 
     
     plt.plot(np.arange(step_max),A, color='blue', linestyle='-', label="A(t)")
     plt.xlabel("time step t")
     plt.ylabel("A(t)")
+    plt.axvline(x=steady_state_time, color='black', linestyle=':', linewidth=2, label="Steady state")
+    plt.legend()
     plt.title("Number of alive cells over time")
-    plt.grid(True)
+    plt.grid(True) 
     plt.show()
 
     plt.plot(np.arange(step_max),D, color='blue', linestyle='-', label="D(t)")
     plt.xlabel("time step t")
     plt.ylabel("D(t)")
+    plt.axvline(x=steady_state_time, color='black', linestyle=':', linewidth=2, label="Steady state")
+    plt.legend()
     plt.title("Density of alive cell per unit area")
     plt.grid(True)
     plt.show()
