@@ -91,7 +91,7 @@ import time
 from tkinter import *
 
 f = 0.05  # Number of randomly selected spins to flip-test.
-N_skip = 999 #10  Visualize status every N_skip steps. 
+N_skip = 4999 #10  Visualize status every N_skip steps. 
 
 window_size = 600
 
@@ -100,9 +100,9 @@ H_list = np.array([-5, -2, -1, -0.5, -0.2, -0.1, 0, 0.1, 0.2, 0.5, 1, 2, 5])  # 
 J = 1  # Spin-spin coupling.
 T = 5  # Temperature. Temperatura critica ~2.269.
 
-steps_max = 1000
+steps_max = 5000
 m = np.zeros(len(H_list))
-avg = 200
+avg = 300
 N = 100
 for index, H in enumerate(H_list):
     #### Re-initialize for each H ####
@@ -207,24 +207,6 @@ plt.legend()
 plt.grid(True)
 plt.show()
 
-### Linear fit with more elements ####
-delta = 0.21 
-# Select data points within the range |H| < delta
-H_fit = np.array([elem for elem in H_list if np.abs(elem) < delta])
-indices = np.where(np.abs(H_list) < delta)
-m_fit = m[indices]
-
-slope, intercept = np.polyfit(H_fit, m_fit, 1)
-fitted_line = slope * np.array(H_list) + intercept
-plt.plot(H_list, m, marker='o', linestyle='-', color='b', label='m(H)')
-plt.plot(H_list, slope * H_list, color='r', linestyle='--', label=f'Linear Fit: y = {slope:.2f}x around H=0')
-plt.xlabel('H')
-plt.ylabel('m')
-plt.ylim([-1, 1])
-plt.title('Plot of m(H) with Linear Fit Around H=0')
-plt.legend()
-plt.grid(True)
-plt.show()
 
 tk.update_idletasks()
 tk.update()
