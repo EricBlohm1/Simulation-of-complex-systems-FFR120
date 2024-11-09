@@ -180,7 +180,7 @@ for index, T in enumerate(T_list):
             time.sleep(0.1)  # Increase to slow down the simulation.
 
         if steps_max - step < avg:
-            m[index] += (1/N**2) * np.sum(sl)
+            m[index] += np.abs((1/N**2) * np.sum(sl))
 
         #test[step] = (1/N**2) * np.sum(sl)
         step += 1
@@ -194,8 +194,6 @@ for index, T in enumerate(T_list):
 plt.plot(T_list, m, marker='o', linestyle='-', color='b', label='m(T)')
 plt.axvline(T_crit, color='black', linestyle=':', linewidth=1.5)
 
-plt.text(T_crit, max(m) * 0.9, 'Critical Temperature', rotation=90, 
-         verticalalignment='center', color='black')
 plt.xlabel('T')
 plt.ylabel('m')
 plt.title('Plot of m(T)')
