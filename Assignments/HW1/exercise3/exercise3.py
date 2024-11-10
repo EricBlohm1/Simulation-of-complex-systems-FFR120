@@ -139,22 +139,20 @@ def powerlaw_random(alpha, x_min, num_drawings):
 
 ###### INIT SYSTEM AND LOOP######
 N_list = np.array([16, 32, 64, 128, 256, 512, 1024])  # Size of the forrest
-N_list = np.array([16, 32, 64, 128, 256])
-alphas = np.zeros(len(N_list))
-stds = np.zeros(len(N_list))
+#_list = np.array([16, 32, 64, 128, 256])
 iterations = 10
+alphas = np.zeros((len(N_list),iterations))
+
 for idx,N in enumerate(N_list):
     print(f"______\nN={N}")
+    #if(N == 512):
+        #iterations = 8
+    #if(N== 1024):
+        #iterations = 6
 
-    
-    if(N == 512):
-        iterations = 8
-    elif(N== 1024):
-        iterations = 5
+    #avgs = []
 
-    avgs = []
-
-    for _ in range(0,iterations):
+    for iter in range(0,iterations):
         p = 0.01  # Growth probability.
         f = 0.2  # Lightning strike probability.
         target_num_fires = 300  
@@ -220,63 +218,68 @@ for idx,N in enumerate(N_list):
         print(f'The empirical prob. distr. exponent: -alpha')
         print(f'with alpha = {alpha:.4}')
 
-        #alphas[idx] += alpha
-        avgs.append(alpha)
+        alphas[idx][iter] = alpha
+        #avgs.append(alpha)
         ############
-
-        ### Compare empirical and synthetic ###
-        x_min = 1  # minimum value for the generated numbers
-        num_drawings = 5000  
-
-        pl_size = powerlaw_random(alpha, x_min, num_drawings)
-
-        c_CDF_pl, s_rel_pl = complementary_CDF(pl_size, forest.size)
-
-        min_rel_size = 1e-3
-        max_rel_size = 1e-1
-
-
-        is_min = np.searchsorted(s_rel_pl, min_rel_size)
-        is_max = np.searchsorted(s_rel_pl, max_rel_size)
-
-        # Note!!! The linear dependence is between the logarithms
-        p = np.polyfit(np.log(s_rel_pl[is_min:is_max]),
-                    np.log(c_CDF_pl[is_min:is_max]), 1)
-
-        beta = p[0]
-        print(f'The empirical cCDF has an exponent beta = {beta:.4}')
-
-        alpha = 1 - beta
-
-        # Note loglog plot!
-        """plt.loglog(s_rel, c_CDF, '.-', color='k', linewidth=1, 
-                label='empirical')
-        plt.loglog(s_rel_pl, c_CDF_pl, '-', color='g', linewidth=3, 
-                label='synthetic data')
-
-        plt.xlim([min(s_rel), 1])
-
-        plt.legend()
-
-        plt.title('Comparison with synthetic data')
-
-        plt.xlabel('relative size')
-        plt.ylabel('c CDF')
-
-        plt.show()"""
-    #alphas[idx] = alphas[idx]/iterations
-    alphas[idx] = np.sum(avgs) / iterations
-    stds[idx] = np.std(avgs)
+    #alphas[idx] = np.sum(avgs) / iterations
+    #stds[idx] = np.std(avgs)
 
 
 print(alphas)
-print(stds)
+#print(stds)
 
-
-plt.plot(1/N_list, alphas, 'o', label='Data points')
+"""plt.plot(1/N_list, alphas, 'o', label='Data points')
 plt.xlabel('1/N')
 plt.ylabel('Alpha')
 plt.title('Plot of 1/N vs. Alpha')
 plt.legend()
 plt.show()
+
+
+# Perform linear fit using polyfit on the last 5 values
+coefficients = np.polyfit(1/N_list, alphas, 1)  # 1 for linear fit
+slope, intercept = coefficients
+line = slope * (1/N_list) + intercept
+
+# Print the y-intercept
+print(f"The y-intercept of the linear fit is: {intercept:.4f}")
+
+plt.plot(1 / N_list, alphas, 'o', label='Data points')
+plt.plot((1/N_list), line, 'r--', label=f'Linear fit (slope={slope:.2f},intercept={intercept:.2f})')
+
+# Labels and title
+plt.xlabel('1/N')
+plt.ylabel('Alpha')
+plt.title('Plot of 1/N vs. Alpha with Linear Fit')
+plt.legend()
+plt.show()"""
+
+# Calculate the mean and standard deviation for each N
+alpha_means = np.mean(alphas, axis=1)   # Mean across the iterations for each N
+
+
+alpha_std_devs = np.std(alphas, axis=1, ddof=1)  # Standard deviation for error bars
+print("means:",alpha_means,"stds: ", alpha_std_devs)
+inv_N_values = [1 / N for N in N_list]
+
+fit_coefficients = np.polyfit(inv_N_values, alpha_means, 1)
+slope, intercept = fit_coefficients
+
+# Generate linear fit line
+fit_line = np.polyval(fit_coefficients, inv_N_values)
+
+# Plot mean alpha points with error bars
+plt.errorbar(inv_N_values, alpha_means, yerr=alpha_std_devs, fmt='o', color='blue', label='Mean alpha +- Std Dev')
+# Plot the linear fit
+plt.plot(inv_N_values, fit_line, 'k--', label=f'Linear Fit: alpha_inf = {intercept:.3f}')
+
+# Add labels and title
+plt.xlabel(r'$1/N$')
+plt.ylabel(r'$\alpha$')
+plt.title('Dependence of alpha on 1/N with Linear Fit')
+plt.legend()
+plt.grid(True)
+plt.show()
+
+
 
