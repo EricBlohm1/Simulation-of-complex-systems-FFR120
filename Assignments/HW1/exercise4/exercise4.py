@@ -120,8 +120,6 @@ rule_2d = np.zeros([2, 9])
 rule_2d[0, :] = [0, 0, 0, 1, 0, 0, 0, 0, 0]  # New born from empty cell.
 rule_2d[1, :] = [0, 0, 1, 1, 0, 0, 0, 0, 0]  # Survival from living cell.
 runs = 5
-avg_D = np.zeros(runs)
-steady_states = np.zeros(runs)
 
 for run in range(0,runs):
     # Random initial state.
@@ -152,10 +150,7 @@ for run in range(0,runs):
     while step < step_max and running:
 
         gol = apply_rule_2d(rule_2d, gol)
-
-        
-
-            
+  
         # Update animation frame.
         if step % N_skip == 0:        
             canvas.delete('all')
@@ -181,38 +176,29 @@ for run in range(0,runs):
             time.sleep(0.1)  # Increase to slow down the simulation.
 
         A[step] = np.sum(gol)
-        D[step] = (1/N**2)*np.sum(gol)
+        D[step] += (1/N**2)*np.sum(gol)
         step += 1
-    avg_D[run] = np.sum(D)/step_max
-    print(f"Average density in run {run} is: {avg_D[run]}")
-    steady_state_time = np.where(D <= avg_D[run])[0][0]
-    steady_states[run] = steady_state_time
-    print(f"Step where steady state is reached: ", steady_state_time)
-
-    
     plt.plot(np.arange(step_max),A, color='blue', linestyle='-', label="A(t)")
     plt.xlabel("time step t")
     plt.ylabel("A(t)")
-    plt.axvline(x=steady_state_time, color='black', linestyle=':', linewidth=2, label="Steady state")
+    #plt.axvline(x=steady_state_time, color='black', linestyle=':', linewidth=2, label="Steady state")
     plt.legend()
     plt.title("Number of alive cells over time")
     plt.grid(True) 
     plt.show()
 
-    plt.plot(np.arange(step_max),D, color='blue', linestyle='-', label="D(t)")
-    plt.xlabel("time step t")
-    plt.ylabel("D(t)")
-    plt.axvline(x=steady_state_time, color='black', linestyle=':', linewidth=2, label="Steady state")
-    plt.legend()
-    plt.title("Density of alive cell per unit area")
-    plt.grid(True)
-    plt.show()
+D = D/runs
 
-    tk.update_idletasks()
-    tk.update()
-    tk.mainloop()  # Release animation handle (close window to finish).
+plt.plot(np.arange(step_max),D, color='blue', linestyle='-', label="D(t)")
+plt.xlabel("time step t")
+plt.ylabel("D(t)")
+#plt.axvline(x=steady_state_time, color='black', linestyle=':', linewidth=2, label="Steady state")
+plt.legend()
+plt.title("Average density of alive cell per unit area over 5 runs")
+plt.grid(True)
+plt.show()
 
-avg_density = np.sum(avg_D)/runs
-print("Average density over 5 runs (in %): ",avg_density*100)
-avg_steady_state = np.sum(steady_states)/runs
-print("Average steady state over 5 runs (in %): ", avg_steady_state)
+
+tk.update_idletasks()
+tk.update()
+tk.mainloop()  # Release animation handle (close window to finish).

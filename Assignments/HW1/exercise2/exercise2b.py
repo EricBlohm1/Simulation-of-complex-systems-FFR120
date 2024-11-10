@@ -108,7 +108,7 @@ k = np.arange(steps_max)
 
 m = np.zeros(len(T_list))
 N = 100
-avg = 200
+avg = 300
 for index, T in enumerate(T_list):
     #### Re-initialize for each H ####
     H = 0.1
@@ -140,8 +140,11 @@ for index, T in enumerate(T_list):
     #############################################################
 
     while step < steps_max and running:
-        if(step == 300):
-            H = 0
+        if(step <= 300):
+            H = 0.1
+        else:
+            H=0
+            
         ns = random.sample(range(Nspins), S)
 
         i_list = list(map(lambda x: x % Ni, ns)) 
@@ -180,12 +183,12 @@ for index, T in enumerate(T_list):
             time.sleep(0.1)  # Increase to slow down the simulation.
 
         if steps_max - step < avg:
-            m[index] += np.abs((1/N**2) * np.sum(sl))
+            m[index] += (1/N**2) * np.sum(sl)
 
         #test[step] = (1/N**2) * np.sum(sl)
         step += 1
 
-    m[index] = m[index]/avg
+    m[index] = np.abs(m[index]/avg)
 
 
 ## Plot m(T)
@@ -193,6 +196,7 @@ for index, T in enumerate(T_list):
 
 plt.plot(T_list, m, marker='o', linestyle='-', color='b', label='m(T)')
 plt.axvline(T_crit, color='black', linestyle=':', linewidth=1.5)
+plt.text(T_crit, 1, f'T_crit = {T_crit}', color='black', ha='center', va='bottom', fontsize=10)
 
 plt.xlabel('T')
 plt.ylabel('m')
