@@ -204,7 +204,7 @@ for run in range(0,runs):
 ## number of alive cells
 plt.figure(figsize=(10, 6))
 for run in range(0,runs):
-    plt.plot(np.arange(step_max),A[run], color=colors[run], linestyle='-', label="A(t)")
+    plt.plot(np.arange(step_max),A[run], color=colors[run], linestyle='-', label="A(t), run " + f"{run+1}")
     plt.xlabel("time step t")
     plt.ylabel("A(t)")
     plt.legend()
@@ -228,7 +228,7 @@ plt.show()
 #Number of cells that changes state
 plt.figure(figsize=(10, 6))
 for run in range(0,runs):
-    plt.plot(np.arange(steady_state,step_max),C[run], color=colors[run], linestyle='-', label="C(t)")
+    plt.plot(np.arange(steady_state,step_max),C[run], color=colors[run], linestyle='-', label="C(t), run " + f"{run+1}")
     plt.xlabel("time step t")
     plt.ylabel("C(t)")
     plt.legend()
