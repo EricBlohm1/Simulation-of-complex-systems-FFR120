@@ -25,28 +25,27 @@ alpha_std_devs = np.array([0.02197956, 0.01876431, 0.01609277, 0.01298387, 0.017
 
 N_list = np.array([16, 32, 64, 128, 256, 512, 1024])
 
-#alpha_means = alpha_means[6:]
-#alpha_std_devs = alpha_std_devs[-6:]
-#N_list = N_list[-6:]
+alpha_means = alpha_means[-5:]
+alpha_std_devs = alpha_std_devs[-5:]
+N_list = N_list[-5:]
 
 # alphas = [1.31513289 1.29298451 1.26087924 1.22198359 1.17718797 1.1361603 1.14262882]#
 #alphas = np.array([1.31864883, 1.29383066, 1.25179234, 1.22168047, 1.18438247, 1.15611362, 1.13029531])
 inv_N_values = [1 / N for N in N_list]
-
+#inv_N_values = np.log(inv_N_values)
 fit_coefficients = np.polyfit(inv_N_values, alpha_means, 1)
 slope, intercept = fit_coefficients
 
 # Generate linear fit line
 fit_line = np.polyval(fit_coefficients, inv_N_values)
-
 # Plot mean alpha points with error bars
 plt.errorbar(inv_N_values, alpha_means, yerr=alpha_std_devs, fmt='o', color='blue', label='Mean alpha +- Std Dev')
 # Plot the linear fit
 plt.plot(inv_N_values, fit_line, 'k--', label=f'Linear Fit: alpha_inf = {intercept:.3f}')
-
 # Add labels and title
 plt.xlabel(r'$1/N$')
 plt.ylabel(r'$\alpha$')
+plt.xticks(ticks=inv_N_values,labels=[f'{val:.3f}' for val in inv_N_values], rotation=60)#, labels=[f'$\\frac{{1}}{{{int(N)}}}$' for N in N_list])
 plt.title('Dependence of alpha on 1/N with Linear Fit')
 plt.legend()
 plt.grid(True)

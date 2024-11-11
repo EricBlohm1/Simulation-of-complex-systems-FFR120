@@ -109,6 +109,14 @@ gol[N // 2 - 3:N // 2 + 3,
 
 
 
+def n_state_change(gol_current, gol_previous):
+    count = 0
+    for i in range(0,len(gol_current)):
+        for j in range(0,len(gol_current[0])):
+            if gol_current[i][j] != gol_previous[i][j]:
+                count +=1
+    return count
+
 # import time
 from tkinter import *
 
@@ -120,6 +128,17 @@ rule_2d = np.zeros([2, 9])
 rule_2d[0, :] = [0, 0, 0, 1, 0, 0, 0, 0, 0]  # New born from empty cell.
 rule_2d[1, :] = [0, 0, 1, 1, 0, 0, 0, 0, 0]  # Survival from living cell.
 runs = 5
+colors = ['blue', 'orange', 'green', 'red', 'purple']
+
+steady_state = 200
+step_max = 300
+A = np.zeros((runs,step_max))
+D = np.zeros(step_max)
+C = np.zeros((runs,step_max-steady_state))
+gol_check = np.zeros((step_max,N,N))
+
+
+
 
 for run in range(0,runs):
     # Random initial state.
@@ -137,10 +156,6 @@ for run in range(0,runs):
     canvas.place(x=10, y=10, height=window_size, width=window_size)
 
     step = 0
-    step_max = 300
-    A = np.zeros(step_max)
-    D = np.zeros(step_max)
-
 
     def stop_loop(event):
         global running
@@ -150,7 +165,10 @@ for run in range(0,runs):
     while step < step_max and running:
 
         gol = apply_rule_2d(rule_2d, gol)
-  
+
+        #keep track of gol's for all steps
+        gol_check[step] = gol.copy()
+
         # Update animation frame.
         if step % N_skip == 0:        
             canvas.delete('all')
@@ -175,28 +193,50 @@ for run in range(0,runs):
             tk.update()
             time.sleep(0.1)  # Increase to slow down the simulation.
 
-        A[step] = np.sum(gol)
+        A[run][step] = np.sum(gol)
         D[step] += (1/N**2)*np.sum(gol)
+
+        if step >= steady_state:
+            count = n_state_change(gol_check[step],gol_check[step-1])
+            C[run][step-steady_state] = count
         step += 1
-    plt.plot(np.arange(step_max),A, color='blue', linestyle='-', label="A(t)")
+
+## number of alive cells
+plt.figure(figsize=(10, 6))
+for run in range(0,runs):
+    plt.plot(np.arange(step_max),A[run], color=colors[run], linestyle='-', label="A(t)")
     plt.xlabel("time step t")
     plt.ylabel("A(t)")
-    #plt.axvline(x=steady_state_time, color='black', linestyle=':', linewidth=2, label="Steady state")
     plt.legend()
     plt.title("Number of alive cells over time")
-    plt.grid(True) 
-    plt.show()
+    plt.grid(True)
+plt.show()
 
+## Density over 5 runs
 D = D/runs
-
+plt.figure(figsize=(10, 6))
 plt.plot(np.arange(step_max),D, color='blue', linestyle='-', label="D(t)")
 plt.xlabel("time step t")
 plt.ylabel("D(t)")
-#plt.axvline(x=steady_state_time, color='black', linestyle=':', linewidth=2, label="Steady state")
+plt.axvline(x=steady_state, color='black', linestyle=':', linewidth=2, label="Empirical steady state")
 plt.legend()
 plt.title("Average density of alive cell per unit area over 5 runs")
 plt.grid(True)
 plt.show()
+
+
+#Number of cells that changes state
+plt.figure(figsize=(10, 6))
+for run in range(0,runs):
+    plt.plot(np.arange(steady_state,step_max),C[run], color=colors[run], linestyle='-', label="C(t)")
+    plt.xlabel("time step t")
+    plt.ylabel("C(t)")
+    plt.legend()
+    plt.title("Number of cells that changes state at time t")
+    plt.grid(True) 
+plt.show()
+
+
 
 
 tk.update_idletasks()

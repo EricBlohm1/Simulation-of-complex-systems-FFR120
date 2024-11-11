@@ -184,19 +184,28 @@ for index, T in enumerate(T_list):
 
         if steps_max - step < avg:
             m[index] += (1/N**2) * np.sum(sl)
-
-        #test[step] = (1/N**2) * np.sum(sl)
         step += 1
 
     m[index] = np.abs(m[index]/avg)
 
 
-## Plot m(T)
-#plt.plot(k,test, marker='o', linestyle='-', color='b', label='m(T)')
+def find_T_crit(m):
+    target = 0.5
+    min_dist, idx = 1, 0
+    for i in range(0,len(m)):
+        tmp = np.abs(m[i]-target)
+        if tmp < min_dist:
+            min_dist = tmp
+            idx = i
+
+    return idx,m[idx]
+
+T_crit_idx, m_crit = find_T_crit(m)
+print("T_crit: ", T_list[T_crit_idx], "m: ", m_crit)
 
 plt.plot(T_list, m, marker='o', linestyle='-', color='b', label='m(T)')
-plt.axvline(T_crit, color='black', linestyle=':', linewidth=1.5)
-plt.text(T_crit, 1, f'T_crit = {T_crit}', color='black', ha='center', va='bottom', fontsize=10)
+plt.axvline(T_list[T_crit_idx], color='black', linestyle=':', linewidth=1.5)
+plt.text(T_list[T_crit_idx], 0.9, f'experimental T_c = {T_list[T_crit_idx]}', color='black', ha='center', va='bottom', fontsize=10)
 
 plt.xlabel('T')
 plt.ylabel('m')

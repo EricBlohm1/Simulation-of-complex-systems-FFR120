@@ -140,7 +140,7 @@ def powerlaw_random(alpha, x_min, num_drawings):
 ###### INIT SYSTEM AND LOOP######
 N_list = np.array([16, 32, 64, 128, 256, 512, 1024])  # Size of the forrest
 #_list = np.array([16, 32, 64, 128, 256])
-iterations = 10
+iterations = 1
 alphas = np.zeros((len(N_list),iterations))
 
 for idx,N in enumerate(N_list):
@@ -198,9 +198,23 @@ for idx,N in enumerate(N_list):
 
         #### cCDF and power law trends #####
 
+        if N== 16 or N ==32 or N== 64 :
+            min_rel_size = 1e-3
+            max_rel_size = 1e-1
+        elif N == 128:
+            min_rel_size = 1e-4
+            max_rel_size = 1e-1
+        elif N== 256 or N== 512:
+            min_rel_size = 1e-5
+            max_rel_size = 1e-1
+        elif N == 1024:
+            min_rel_size = 1e-6
+            max_rel_size = 1e-1
+
+
         ### Empirical ###
-        min_rel_size = 1e-3
-        max_rel_size = 1e-1
+        #min_rel_size = 1e-3
+        #max_rel_size = 1e-1
 
 
         is_min = np.searchsorted(s_rel, min_rel_size)
