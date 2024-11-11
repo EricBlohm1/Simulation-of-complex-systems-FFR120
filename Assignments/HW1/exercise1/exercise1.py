@@ -262,14 +262,6 @@ plt.show()
 N = len(x_positions)
 msd = np.zeros(N)
 for n in range(0,N):
-    print(n)
-    """frac = 1/(N-n)
-    sum = 0
-    for i in range(0, N-n):
-        sum += (x_positions[i+n]-x_positions[i]) ** 2 + (y_positions[i+n]-y_positions[i])**2
-    tmp = frac * sum 
-    msd[n] = tmp"""
-
     #  x_positions[n:] = all elements starting from the nth one = so basically i+n
     #  x_positions[:N-n] = all elements starting from the first up to N-n = so basically elements i=1 to N-n
     # analogous for y_positions
@@ -281,13 +273,14 @@ for n in range(0,N):
     msd[n] = np.mean(squared_displacements)
 
 
+t = np.arange(0,N)*dt
 # Create the plot
 plt.figure(figsize=(10, 6))
-plt.plot(range(N), msd, marker='o', linestyle='-', color='b', label='MSD', markersize=1)
+plt.plot(t, msd, marker='o', linestyle='-', color='b', label='MSD', markersize=1)
 
 # Add labels and title
-plt.title('Mean Squared Displacement (MSD) vs. Time Lag', fontsize=16)
-plt.xlabel('Time Lag (n)', fontsize=14)
+plt.title('Mean Squared Displacement (MSD) vs. time', fontsize=16)
+plt.xlabel('time t', fontsize=14)
 plt.ylabel('MSD', fontsize=14)
 
 # Add a grid and legend
