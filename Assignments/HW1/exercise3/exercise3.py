@@ -139,18 +139,11 @@ def powerlaw_random(alpha, x_min, num_drawings):
 
 ###### INIT SYSTEM AND LOOP######
 N_list = np.array([16, 32, 64, 128, 256, 512, 1024])  # Size of the forrest
-#_list = np.array([16, 32, 64, 128, 256])
-iterations = 1
+iterations = 10
 alphas = np.zeros((len(N_list),iterations))
 
 for idx,N in enumerate(N_list):
     print(f"______\nN={N}")
-    #if(N == 512):
-        #iterations = 8
-    #if(N== 1024):
-        #iterations = 6
-
-    #avgs = []
 
     for iter in range(0,iterations):
         p = 0.01  # Growth probability.
@@ -198,6 +191,7 @@ for idx,N in enumerate(N_list):
 
         #### cCDF and power law trends #####
 
+        ## Different sizes for each N, these values are obtained from plotting empirical cCDF and exmanining the relative sizes.
         if N== 16 or N ==32 or N== 64 :
             min_rel_size = 1e-3
             max_rel_size = 1e-1
@@ -216,7 +210,6 @@ for idx,N in enumerate(N_list):
         #min_rel_size = 1e-3
         #max_rel_size = 1e-1
 
-
         is_min = np.searchsorted(s_rel, min_rel_size)
         is_max = np.searchsorted(s_rel, max_rel_size)
 
@@ -233,61 +226,26 @@ for idx,N in enumerate(N_list):
         print(f'with alpha = {alpha:.4}')
 
         alphas[idx][iter] = alpha
-        #avgs.append(alpha)
         ############
-    #alphas[idx] = np.sum(avgs) / iterations
-    #stds[idx] = np.std(avgs)
-
 
 print(alphas)
-#print(stds)
 
-"""plt.plot(1/N_list, alphas, 'o', label='Data points')
-plt.xlabel('1/N')
-plt.ylabel('Alpha')
-plt.title('Plot of 1/N vs. Alpha')
-plt.legend()
-plt.show()
-
-
-# Perform linear fit using polyfit on the last 5 values
-coefficients = np.polyfit(1/N_list, alphas, 1)  # 1 for linear fit
-slope, intercept = coefficients
-line = slope * (1/N_list) + intercept
-
-# Print the y-intercept
-print(f"The y-intercept of the linear fit is: {intercept:.4f}")
-
-plt.plot(1 / N_list, alphas, 'o', label='Data points')
-plt.plot((1/N_list), line, 'r--', label=f'Linear fit (slope={slope:.2f},intercept={intercept:.2f})')
-
-# Labels and title
-plt.xlabel('1/N')
-plt.ylabel('Alpha')
-plt.title('Plot of 1/N vs. Alpha with Linear Fit')
-plt.legend()
-plt.show()"""
-
-# Calculate the mean and standard deviation for each N
 alpha_means = np.mean(alphas, axis=1)   # Mean across the iterations for each N
-
-
 alpha_std_devs = np.std(alphas, axis=1, ddof=1)  # Standard deviation for error bars
 print("means:",alpha_means,"stds: ", alpha_std_devs)
 inv_N_values = [1 / N for N in N_list]
 
+## Only plot the final 5 points, where the alpha seem to converge.
+alpha_means = alpha_means[-5:]
+alpha_std_devs = alpha_std_devs[-5:]
+N_list = N_list[-5:]
+
 fit_coefficients = np.polyfit(inv_N_values, alpha_means, 1)
 slope, intercept = fit_coefficients
-
-# Generate linear fit line
 fit_line = np.polyval(fit_coefficients, inv_N_values)
 
-# Plot mean alpha points with error bars
 plt.errorbar(inv_N_values, alpha_means, yerr=alpha_std_devs, fmt='o', color='blue', label='Mean alpha +- Std Dev')
-# Plot the linear fit
 plt.plot(inv_N_values, fit_line, 'k--', label=f'Linear Fit: alpha_inf = {intercept:.3f}')
-
-# Add labels and title
 plt.xlabel(r'$1/N$')
 plt.ylabel(r'$\alpha$')
 plt.title('Dependence of alpha on 1/N with Linear Fit')
