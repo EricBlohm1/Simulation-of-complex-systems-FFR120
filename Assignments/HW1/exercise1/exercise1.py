@@ -268,7 +268,6 @@ for n in range(0,N):
     dx = x_positions[n:] - x_positions[:N-n]
     dy = y_positions[n:] - y_positions[:N-n]
     squared_displacements = dx**2 + dy**2
-    
     # Use the mean directly to compute the MSD
     msd[n] = np.mean(squared_displacements)
 
