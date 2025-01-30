@@ -1,1 +1,1 @@
-These are my assignment solutions from the Chalmers course Simulation of Complex Systems.
+These are my solutions to the assignments for the Chalmers course Simulation of Complex Systems.
